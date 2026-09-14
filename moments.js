@@ -19,14 +19,14 @@ window.moments = [
       },
     },
     state: "latent",
-    intensity: 0.46,
+    intensity: 0.3,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      spiral: 0.4,
-      network: 0.06,
-      architecture: 0,
-      archive: 0,
-      stability: 0.28,
+      structure: "loose_ring", // Un anillo perezoso y desconectado
+      linkOpacity: 0.05,       // Casi invisibles
+      pulseRate: 0.0,          // No hay flujo de información
+      spread: 1.0,
+      rotation: 0.1,
     },
   },
   {
@@ -50,14 +50,14 @@ window.moments = [
       placement: "background",
     },
     state: "architecture",
-    intensity: 0.34,
-    colors: ["#f7f7f4", "#08a9dd", "#e96daa"],
+    intensity: 0.1,
+    colors: ["#dde2e6", "#08a9dd", "#e96daa"],
     behavior: {
-      spiral: 0.14,
-      network: 0.02,
-      architecture: 0.2,
-      archive: 0,
-      stability: 0.78,
+      structure: "grid",       // Paradigma rígido, cuadrícula institucional
+      linkOpacity: 0.1,
+      pulseRate: 0.0,
+      spread: 0.8,
+      rotation: 0.0,           // Estático
     },
   },
   {
@@ -75,14 +75,14 @@ window.moments = [
       },
     },
     state: "opening",
-    intensity: 0.56,
+    intensity: 0.5,
     colors: ["#08a9dd", "#f7f7f4", "#f7353f"],
     behavior: {
-      spiral: 0.5,
-      network: 0.045,
-      architecture: 0,
-      archive: 0.04,
-      stability: 0.12,
+      structure: "expanding_cloud", // Se rompe la grilla y se abre al lienzo
+      linkOpacity: 0.15,
+      pulseRate: 0.2,               // Empiezan tímidos pulsos
+      spread: 1.5,
+      rotation: 0.2,
     },
   },
   {
@@ -100,14 +100,14 @@ window.moments = [
       },
     },
     state: "triad",
-    intensity: 0.64,
+    intensity: 0.7,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      spiral: 0.42,
-      network: 0.34,
-      architecture: 0,
-      archive: 0.08,
-      stability: 0.5,
+      structure: "triad_clusters", // Tres centros organizados
+      linkOpacity: 0.25,
+      pulseRate: 0.3,
+      spread: 1.0,
+      rotation: 0.4,
     },
   },
   {
@@ -125,14 +125,14 @@ window.moments = [
       },
     },
     state: "impact",
-    intensity: 0.7,
+    intensity: 0.8,
     colors: ["#f7353f", "#e96daa", "#f7f7f4"],
     behavior: {
-      spiral: 0.52,
-      network: 0.46,
-      architecture: 0,
-      archive: 0.08,
-      stability: 0.38,
+      structure: "triad_impact", // Los clusters generan un pulso rítmico (impacto)
+      linkOpacity: 0.4,
+      pulseRate: 0.6,
+      spread: 1.2,
+      rotation: 0.5,
     },
   },
   {
@@ -150,14 +150,14 @@ window.moments = [
       },
     },
     state: "community",
-    intensity: 0.74,
+    intensity: 0.6,
     colors: ["#08a9dd", "#e96daa", "#f7f7f4"],
     behavior: {
-      spiral: 0.56,
-      network: 0.9,
-      architecture: 0,
-      archive: 0.12,
-      stability: 0.58,
+      structure: "constellation", // Un gran tejido interconectado unificado
+      linkOpacity: 0.5,
+      pulseRate: 0.4,
+      spread: 1.1,
+      rotation: 0.3,
     },
   },
   {
@@ -178,11 +178,11 @@ window.moments = [
     intensity: 0.8,
     colors: ["#08a9dd", "#e96daa", "#f7353f"],
     behavior: {
-      spiral: 0.5,
-      network: 0.98,
-      architecture: 0,
-      archive: 0,
-      stability: 0.96,
+      structure: "constellation", 
+      linkOpacity: 0.8,        // Los enlaces se vuelven muy sólidos
+      pulseRate: 0.9,          // MUCHA luz viajando por la red (representa confianza/datos)
+      spread: 1.0,
+      rotation: 0.4,
     },
   },
   {
@@ -200,14 +200,14 @@ window.moments = [
       },
     },
     state: "routes",
-    intensity: 0.7,
+    intensity: 0.8,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      spiral: 0.62,
-      network: 0.52,
-      architecture: 0,
-      archive: 0,
-      stability: 0.54,
+      structure: "orbital_routes", // Experiencia al centro, jóvenes orbitando amplio
+      linkOpacity: 0.4,
+      pulseRate: 0.5,
+      spread: 1.4,
+      rotation: 0.8,               // Gira rápido representando exploración
     },
   },
   {
@@ -225,14 +225,14 @@ window.moments = [
       },
     },
     state: "duality",
-    intensity: 0.78,
+    intensity: 0.7,
     colors: ["#f7f7f4", "#08a9dd", "#f7353f"],
     behavior: {
-      spiral: 0.58,
-      network: 0.18,
-      architecture: 0,
-      archive: 0,
-      stability: 0.88,
+      structure: "dual_rings", // Dos anillos bien definidos y separados
+      linkOpacity: 0.2,
+      pulseRate: 0.3,
+      spread: 1.0,
+      rotation: 0.5,
     },
   },
   {
@@ -250,14 +250,14 @@ window.moments = [
       },
     },
     state: "convergence",
-    intensity: 0.84,
+    intensity: 0.9,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      spiral: 0.72,
-      network: 0.94,
-      architecture: 0,
-      archive: 0.04,
-      stability: 0.78,
+      structure: "interlocking_rings", // Los anillos se cruzan
+      linkOpacity: 0.6,
+      pulseRate: 0.8,                  // Pulsos de colaboración entre anillos
+      spread: 0.9,
+      rotation: 0.6,
     },
   },
   {
@@ -275,14 +275,14 @@ window.moments = [
       },
     },
     state: "present",
-    intensity: 0.86,
+    intensity: 0.9,
     colors: ["#f7353f", "#08a9dd", "#f7f7f4"],
     behavior: {
-      spiral: 0.78,
-      network: 0.72,
-      architecture: 0,
-      archive: 0.06,
-      stability: 0.42,
+      structure: "youth_forward", // El anillo joven pasa al frente y domina la pantalla
+      linkOpacity: 0.5,
+      pulseRate: 0.6,
+      spread: 1.2,
+      rotation: 0.7,
     },
   },
   {
@@ -300,14 +300,14 @@ window.moments = [
       },
     },
     state: "future",
-    intensity: 0.96,
+    intensity: 1.0,
     colors: ["#f7f7f4", "#08a9dd", "#f7353f"],
     behavior: {
-      spiral: 0.96,
-      network: 0.96,
-      architecture: 0,
-      archive: 0,
-      stability: 0.64,
+      structure: "mandala", // Integración total geométrica y perfecta
+      linkOpacity: 0.8,
+      pulseRate: 1.0,       // Toda la red brilla intensamente
+      spread: 0.85,
+      rotation: 0.3,
     },
   },
   {
@@ -325,14 +325,14 @@ window.moments = [
       },
     },
     state: "qr",
-    intensity: 0.86,
+    intensity: 0.6,
     colors: ["#f7f7f4", "#08a9dd", "#f7353f"],
     behavior: {
-      spiral: 0.98,
-      network: 0.98,
-      architecture: 0,
-      archive: 0,
-      stability: 0.86,
+      structure: "mandala",
+      linkOpacity: 0.4,
+      pulseRate: 0.2, // El sistema se queda vivo pero en reposo
+      spread: 0.85,
+      rotation: 0.1,
     },
   },
 ];

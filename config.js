@@ -3,9 +3,9 @@ window.CONFIG = {
   brandLine: "Future Leaders Forum · Fórum UPB",
   defaultLanguage: "pt",
   aspectRatio: 16 / 9,
-  particleCount: 138,
-  connectionDistance: 165,
-  transitionSpeed: 0.055,
+  particleCount: 75, // Reducido para un diseño limpio y minimalista
+  connectionDistance: 200, // Conexiones más largas para una malla más amplia
+  transitionSpeed: 0.03, // Transiciones muy elegantes y pausadas
   assets: {
     ceremonyImage: "./assets/ceremonia-grados-placeholder.png",
     byMoment: {
