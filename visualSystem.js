@@ -207,27 +207,56 @@ class VisualSystem {
   }
 
   drawBackground(ctx, hasBackgroundAsset = false) {
+    const w = this.width;
+    const h = this.height;
+    const cx = w * this.params.centerX;
+    const cy = h * this.params.centerY;
+
     if (hasBackgroundAsset) {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      const haze = ctx.createRadialGradient(
-        this.width * this.params.centerX, this.height * this.params.centerY, 0,
-        this.width * this.params.centerX, this.height * this.params.centerY, this.width * 0.48
-      );
-      haze.addColorStop(0, rgba(this.colors[1], 0.04 + this.params.intensity * 0.03));
-      haze.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = haze;
-      ctx.fillRect(0, 0, this.width, this.height);
+      
+      const mainGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.55);
+      mainGlow.addColorStop(0, rgba(this.colors[0], 0.1 + this.params.intensity * 0.05));
+      mainGlow.addColorStop(0.5, rgba(this.colors[1] || this.colors[0], 0.04));
+      mainGlow.addColorStop(1, "rgba(0,0,0,0)");
+      
+      ctx.fillStyle = mainGlow;
+      ctx.fillRect(0, 0, w, h);
       ctx.restore();
       return;
     }
 
-    const gradient = ctx.createLinearGradient(0, 0, this.width, this.height);
-    gradient.addColorStop(0, "#050607");
-    gradient.addColorStop(0.44, rgba(this.colors[0], 0.08 + this.params.intensity * 0.06));
-    gradient.addColorStop(1, "#111315");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, this.width, this.height);
+    // FONDOS DINÁMICOS CON DOBLE FUENTE DE LUZ ATMOSFÉRICA
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, "#040506");
+    bgGrad.addColorStop(1, "#0a0c0e");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.globalCompositeOperation = "screen";
+
+    // Foco Principal: Sigue el centro visual del momento
+    const pulse = Math.sin(this.time * 0.8) * 0.04;
+    const r1 = w * (0.42 + pulse);
+    const glow1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r1);
+    glow1.addColorStop(0, rgba(this.colors[0], 0.18 + this.params.intensity * 0.08));
+    glow1.addColorStop(0.55, rgba(this.colors[1] || this.colors[0], 0.06));
+    glow1.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = glow1;
+    ctx.fillRect(0, 0, w, h);
+
+    // Reflector Secundario de Contrapunto en Esquina Opuesta
+    const oppCx = w * (1 - this.params.centerX * 0.75);
+    const oppCy = h * (1 - this.params.centerY * 0.75);
+    const glow2 = ctx.createRadialGradient(oppCx, oppCy, 0, oppCx, oppCy, w * 0.45);
+    glow2.addColorStop(0, rgba(this.colors[2] || this.colors[0], 0.12));
+    glow2.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = glow2;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.restore();
   }
 
   drawConstellation(ctx) {

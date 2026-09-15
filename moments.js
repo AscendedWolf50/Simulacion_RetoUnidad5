@@ -35,12 +35,12 @@ window.moments = [
     layout: "left",
     copy: {
       es: {
-        kicker: "Espacio",
+        kicker: "Infraestructura Latente",
         title: "¿Un gran auditorio solo para hacer grados?",
         subtitle: "",
       },
       pt: {
-        kicker: "Espaço",
+        kicker: "Infraestrutura Latente",
         title: "Um grande auditório apenas para formaturas?",
         subtitle: "",
       },
@@ -67,12 +67,12 @@ window.moments = [
     layout: "right",
     copy: {
       es: {
-        kicker: "Encuentro",
+        kicker: "Apertura al Ecosistema",
         title: "Los eventos no llegaron a la Universidad. La Universidad decidió encontrarse con el mundo.",
         subtitle: "",
       },
       pt: {
-        kicker: "Encontro",
+        kicker: "Abertura ao Ecossistema",
         title: "Os eventos não chegaram à Universidade. A Universidade decidiu se encontrar com o mundo.",
         subtitle: "",
       },
@@ -93,12 +93,12 @@ window.moments = [
     layout: "left",
     copy: {
       es: {
-        kicker: "Tres fuerzas",
+        kicker: "Sinergia Triple",
         title: "Academia + Industria + Ciudad",
         subtitle: "",
       },
       pt: {
-        kicker: "Três forças",
+        kicker: "Sinergia Tripartite",
         title: "Academia + Indústria + Cidade",
         subtitle: "",
       },
@@ -119,12 +119,12 @@ window.moments = [
     layout: "right",
     copy: {
       es: {
-        kicker: "Impacto",
+        kicker: "Propósito Real",
         title: "Los eventos nunca fueron el objetivo. El impacto sí.",
         subtitle: "",
       },
       pt: {
-        kicker: "Impacto",
+        kicker: "Propósito Real",
         title: "Os eventos nunca foram o objetivo. O impacto, sim.",
         subtitle: "",
       },
@@ -145,12 +145,12 @@ window.moments = [
     layout: "center",
     copy: {
       es: {
-        kicker: "Comunidad",
+        kicker: "Tejido de Transformación",
         title: "Un evento trae personas. Una comunidad trae transformación.",
         subtitle: "",
       },
       pt: {
-        kicker: "Comunidade",
+        kicker: "Tecido de Transformação",
         title: "Um evento traz pessoas. Uma comunidade traz transformação.",
         subtitle: "",
       },
@@ -171,12 +171,12 @@ window.moments = [
     layout: "left",
     copy: {
       es: {
-        kicker: "Confianza",
+        kicker: "Catalizador de Talento",
         title: "El talento crece a la velocidad de la confianza.",
         subtitle: "",
       },
       pt: {
-        kicker: "Confiança",
+        kicker: "Catalisador de Talento",
         title: "O talento cresce na velocidade da confiança.",
         subtitle: "",
       },
@@ -197,12 +197,12 @@ window.moments = [
     layout: "right",
     copy: {
       es: {
-        kicker: "Rutas",
+        kicker: "Exploración Dirigida",
         title: "La experiencia construye el camino. Las nuevas generaciones descubren nuevas rutas.",
         subtitle: "",
       },
       pt: {
-        kicker: "Rotas",
+        kicker: "Exploração Dirigida",
         title: "A experiência constrói o caminho. As novas gerações descobrem novas rotas.",
         subtitle: "",
       },
@@ -223,12 +223,12 @@ window.moments = [
     layout: "left",
     copy: {
       es: {
-        kicker: "Relevo",
+        kicker: "Puente Intergeneracional",
         title: "Una visión. Dos generaciones.",
         subtitle: "",
       },
       pt: {
-        kicker: "Revezamento",
+        kicker: "Ponte Intergeracional",
         title: "Uma visão. Duas gerações.",
         subtitle: "",
       },
@@ -249,12 +249,12 @@ window.moments = [
     layout: "right",
     copy: {
       es: {
-        kicker: "Composición",
+        kicker: "Colaboración Simbiótica",
         title: "El crecimiento no ocurre cuando una generación reemplaza a otra. Ocurre cuando trabajan juntas.",
         subtitle: "",
       },
       pt: {
-        kicker: "Composição",
+        kicker: "Colaboração Simbiótica",
         title: "O crescimento não acontece quando uma geração substitui a outra. Acontece quando trabalham juntas.",
         subtitle: "",
       },
@@ -275,12 +275,12 @@ window.moments = [
     layout: "center",
     copy: {
       es: {
-        kicker: "Presente",
+        kicker: "Liderazgo del Ahora",
         title: "Los jóvenes no son el futuro. Son el presente que muchas organizaciones aún no ven.",
         subtitle: "",
       },
       pt: {
-        kicker: "Presente",
+        kicker: "Liderança do Agora",
         title: "Os jovens não são o futuro. São o presente que muitas organizações ainda não veem.",
         subtitle: "",
       },
@@ -301,12 +301,12 @@ window.moments = [
     layout: "center",
     copy: {
       es: {
-        kicker: "Futuro construido",
+        kicker: "Acción Intencional",
         title: "El futuro no se hereda. Se construye.",
         subtitle: "",
       },
       pt: {
-        kicker: "Futuro construído",
+        kicker: "Ação Intencional",
         title: "O futuro não se herda. Ele se constrói.",
         subtitle: "",
       },
@@ -327,12 +327,12 @@ window.moments = [
     layout: "center",
     copy: {
       es: {
-        kicker: "Continuidad",
+        kicker: "Red de Conversación",
         title: "@centrodeeventosupb",
         subtitle: "",
       },
       pt: {
-        kicker: "Continuidade",
+        kicker: "Rede de Conversa",
         title: "@centrodeeventosupb",
         subtitle: "",
       },
