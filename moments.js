@@ -6,6 +6,7 @@ window.languageLabels = {
 window.moments = [
   {
     id: "relevo-generacional",
+    layout: "center",
     copy: {
       es: {
         kicker: "Future Leaders Forum · Fórum UPB",
@@ -22,15 +23,16 @@ window.moments = [
     intensity: 0.3,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      structure: "loose_ring", // Un anillo perezoso y desconectado
-      linkOpacity: 0.05,       // Casi invisibles
-      pulseRate: 0.0,          // No hay flujo de información
+      structure: "loose_ring",
+      linkOpacity: 0.05,
+      pulseRate: 0.0,
       spread: 1.0,
       rotation: 0.1,
     },
   },
   {
     id: "auditorio-grados",
+    layout: "left",
     copy: {
       es: {
         kicker: "Espacio",
@@ -53,15 +55,16 @@ window.moments = [
     intensity: 0.1,
     colors: ["#dde2e6", "#08a9dd", "#e96daa"],
     behavior: {
-      structure: "grid",       // Paradigma rígido, cuadrícula institucional
+      structure: "grid",
       linkOpacity: 0.1,
       pulseRate: 0.0,
       spread: 0.8,
-      rotation: 0.0,           // Estático
+      rotation: 0.0,
     },
   },
   {
     id: "universidad-mundo",
+    layout: "right",
     copy: {
       es: {
         kicker: "Encuentro",
@@ -78,15 +81,16 @@ window.moments = [
     intensity: 0.5,
     colors: ["#08a9dd", "#f7f7f4", "#f7353f"],
     behavior: {
-      structure: "expanding_cloud", // Se rompe la grilla y se abre al lienzo
+      structure: "expanding_cloud",
       linkOpacity: 0.15,
-      pulseRate: 0.2,               // Empiezan tímidos pulsos
+      pulseRate: 0.2,
       spread: 1.5,
       rotation: 0.2,
     },
   },
   {
     id: "academia-industria-ciudad",
+    layout: "left",
     copy: {
       es: {
         kicker: "Tres fuerzas",
@@ -103,7 +107,7 @@ window.moments = [
     intensity: 0.7,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      structure: "triad_clusters", // Tres centros organizados
+      structure: "triad_clusters",
       linkOpacity: 0.25,
       pulseRate: 0.3,
       spread: 1.0,
@@ -112,6 +116,7 @@ window.moments = [
   },
   {
     id: "impacto",
+    layout: "right",
     copy: {
       es: {
         kicker: "Impacto",
@@ -128,7 +133,7 @@ window.moments = [
     intensity: 0.8,
     colors: ["#f7353f", "#e96daa", "#f7f7f4"],
     behavior: {
-      structure: "triad_impact", // Los clusters generan un pulso rítmico (impacto)
+      structure: "triad_impact",
       linkOpacity: 0.4,
       pulseRate: 0.6,
       spread: 1.2,
@@ -137,6 +142,7 @@ window.moments = [
   },
   {
     id: "comunidad",
+    layout: "center",
     copy: {
       es: {
         kicker: "Comunidad",
@@ -153,7 +159,7 @@ window.moments = [
     intensity: 0.6,
     colors: ["#08a9dd", "#e96daa", "#f7f7f4"],
     behavior: {
-      structure: "constellation", // Un gran tejido interconectado unificado
+      structure: "constellation",
       linkOpacity: 0.5,
       pulseRate: 0.4,
       spread: 1.1,
@@ -162,6 +168,7 @@ window.moments = [
   },
   {
     id: "confianza",
+    layout: "left",
     copy: {
       es: {
         kicker: "Confianza",
@@ -179,14 +186,15 @@ window.moments = [
     colors: ["#08a9dd", "#e96daa", "#f7353f"],
     behavior: {
       structure: "constellation", 
-      linkOpacity: 0.8,        // Los enlaces se vuelven muy sólidos
-      pulseRate: 0.9,          // MUCHA luz viajando por la red (representa confianza/datos)
+      linkOpacity: 0.8,
+      pulseRate: 0.9,
       spread: 1.0,
       rotation: 0.4,
     },
   },
   {
     id: "nuevas-rutas",
+    layout: "right",
     copy: {
       es: {
         kicker: "Rutas",
@@ -203,15 +211,16 @@ window.moments = [
     intensity: 0.8,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      structure: "orbital_routes", // Experiencia al centro, jóvenes orbitando amplio
+      structure: "orbital_routes",
       linkOpacity: 0.4,
       pulseRate: 0.5,
       spread: 1.4,
-      rotation: 0.8,               // Gira rápido representando exploración
+      rotation: 0.8,
     },
   },
   {
     id: "vision-generaciones",
+    layout: "left",
     copy: {
       es: {
         kicker: "Relevo",
@@ -228,7 +237,7 @@ window.moments = [
     intensity: 0.7,
     colors: ["#f7f7f4", "#08a9dd", "#f7353f"],
     behavior: {
-      structure: "dual_rings", // Dos anillos bien definidos y separados
+      structure: "dual_rings",
       linkOpacity: 0.2,
       pulseRate: 0.3,
       spread: 1.0,
@@ -237,6 +246,7 @@ window.moments = [
   },
   {
     id: "trabajan-juntas",
+    layout: "right",
     copy: {
       es: {
         kicker: "Composición",
@@ -253,15 +263,16 @@ window.moments = [
     intensity: 0.9,
     colors: ["#08a9dd", "#f7353f", "#e96daa"],
     behavior: {
-      structure: "interlocking_rings", // Los anillos se cruzan
+      structure: "interlocking_rings",
       linkOpacity: 0.6,
-      pulseRate: 0.8,                  // Pulsos de colaboración entre anillos
+      pulseRate: 0.8,
       spread: 0.9,
       rotation: 0.6,
     },
   },
   {
     id: "presente-joven",
+    layout: "center",
     copy: {
       es: {
         kicker: "Presente",
@@ -278,7 +289,7 @@ window.moments = [
     intensity: 0.9,
     colors: ["#f7353f", "#08a9dd", "#f7f7f4"],
     behavior: {
-      structure: "youth_forward", // El anillo joven pasa al frente y domina la pantalla
+      structure: "youth_forward",
       linkOpacity: 0.5,
       pulseRate: 0.6,
       spread: 1.2,
@@ -287,6 +298,7 @@ window.moments = [
   },
   {
     id: "futuro-construido",
+    layout: "center",
     copy: {
       es: {
         kicker: "Futuro construido",
@@ -303,15 +315,16 @@ window.moments = [
     intensity: 1.0,
     colors: ["#f7f7f4", "#08a9dd", "#f7353f"],
     behavior: {
-      structure: "mandala", // Integración total geométrica y perfecta
+      structure: "mandala",
       linkOpacity: 0.8,
-      pulseRate: 1.0,       // Toda la red brilla intensamente
+      pulseRate: 1.0,
       spread: 0.85,
       rotation: 0.3,
     },
   },
   {
     id: "qr-cierre",
+    layout: "center",
     copy: {
       es: {
         kicker: "Continuidad",
@@ -330,7 +343,7 @@ window.moments = [
     behavior: {
       structure: "mandala",
       linkOpacity: 0.4,
-      pulseRate: 0.2, // El sistema se queda vivo pero en reposo
+      pulseRate: 0.2,
       spread: 0.85,
       rotation: 0.1,
     },

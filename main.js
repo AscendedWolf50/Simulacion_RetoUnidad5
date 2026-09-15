@@ -291,6 +291,8 @@ function setMoment(index) {
     stage.classList.toggle("is-title-moment", activeIndex === 0);
     stage.classList.toggle("is-closing-moment", activeIndex === moments.length - 1);
     stage.dataset.moment = moment.id;
+    stage.dataset.layout = moment.layout || "left";
+    copyLayer.dataset.layout = moment.layout || "left";
     copyLayer.classList.toggle("is-qr", moment.state === "qr");
     copyLayer.classList.toggle("has-asset", hasImageAsset && !hasBackgroundAsset);
     copyLayer.classList.toggle("has-background-asset", hasBackgroundAsset);

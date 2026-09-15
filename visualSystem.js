@@ -22,20 +22,20 @@ class VisualSystem {
     this.dpr = 1;
     this.time = 0;
     
-    // Parámetros de la gramática controlados por moments.js
     this.params = {
       linkOpacity: 0.1,
       pulseRate: 0.0,
       spread: 1.0,
       rotation: 0.1,
       intensity: 0.5,
+      centerX: 0.65,
+      centerY: 0.48,
     };
     
     this.target = { ...this.params, structure: "loose_ring" };
     this.current = null;
     this.colors = ["#08a9dd", "#f7353f", "#e96daa"];
     
-    // Inicialización del Talento (Nodos Controlados)
     this.particles = Array.from({ length: CONFIG.particleCount }, (_, i) => {
       const isExperience = i % 2 === 0;
       return {
@@ -69,9 +69,24 @@ class VisualSystem {
   setMoment(moment) {
     this.current = moment;
     this.colors = moment.colors;
+
+    let targetCx = 0.65;
+    let targetCy = 0.48;
+
+    if (moment.layout === "right") {
+      targetCx = 0.30;
+    } else if (moment.layout === "center") {
+      targetCx = 0.50;
+      targetCy = 0.45;
+    } else if (moment.layout === "left") {
+      targetCx = 0.70;
+    }
+
     this.target = {
       ...moment.behavior,
       intensity: moment.intensity,
+      centerX: targetCx,
+      centerY: targetCy,
     };
   }
 
@@ -86,8 +101,8 @@ class VisualSystem {
   }
 
   calculateTargets() {
-    const cx = 0.64; 
-    const cy = 0.46; 
+    const cx = this.params.centerX; 
+    const cy = this.params.centerY; 
     const t = this.time * this.params.rotation;
     const structure = this.target.structure || "loose_ring";
     
@@ -104,11 +119,15 @@ class VisualSystem {
         const cols = Math.floor(Math.sqrt(pCount));
         const row = Math.floor(i / cols);
         const col = i % cols;
-        tx = 0.45 + (col / cols) * 0.4 * this.params.spread;
-        ty = 0.25 + (row / cols) * 0.6 * this.params.spread;
+        tx = (cx - 0.2) + (col / cols) * 0.4 * this.params.spread;
+        ty = (cy - 0.2) + (row / cols) * 0.4 * this.params.spread;
       } 
       else if (structure === "triad_clusters" || structure === "triad_impact") {
-        const centers = [{x: 0.55, y: 0.3}, {x: 0.8, y: 0.6}, {x: 0.45, y: 0.65}];
+        const centers = [
+          { x: cx - 0.1, y: cy - 0.15 }, 
+          { x: cx + 0.15, y: cy + 0.1 }, 
+          { x: cx - 0.15, y: cy + 0.15 }
+        ];
         const center = centers[p.lane];
         const r = (p.role === "experience" ? 0.05 : 0.12) * this.params.spread;
         const impactPulse = structure === "triad_impact" ? Math.sin(t * 10 + p.lane) * 0.03 : 0;
@@ -192,8 +211,8 @@ class VisualSystem {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
       const haze = ctx.createRadialGradient(
-        this.width * 0.64, this.height * 0.48, 0,
-        this.width * 0.64, this.height * 0.48, this.width * 0.48
+        this.width * this.params.centerX, this.height * this.params.centerY, 0,
+        this.width * this.params.centerX, this.height * this.params.centerY, this.width * 0.48
       );
       haze.addColorStop(0, rgba(this.colors[1], 0.04 + this.params.intensity * 0.03));
       haze.addColorStop(1, "rgba(0,0,0,0)");
@@ -252,10 +271,9 @@ class VisualSystem {
               const pulseY = lerp(y1, y2, routeProgress);
               const pulseAlpha = Math.sin(routeProgress * Math.PI) * this.params.pulseRate * strength * 0.8;
               
-              // Pulsos de energía (ahora son rombos de luz en lugar de círculos)
               ctx.save();
               ctx.translate(pulseX, pulseY);
-              ctx.rotate(this.time * 3); // Giran rápidamente al viajar
+              ctx.rotate(this.time * 3);
               ctx.fillStyle = rgba(color, pulseAlpha);
               ctx.beginPath();
               const pSize = 2.5;
@@ -290,8 +308,6 @@ class VisualSystem {
       }
 
       const alpha = 0.6 + this.params.intensity * 0.4;
-      
-      // Ajuste de tamaño para las formas poligonales
       const baseSize = p.role === "experience" ? 4.5 : 3.5; 
       const pulse = 1 + Math.sin(this.time * 2 + p.baseAngle) * 0.2;
       const size = baseSize * pulse;
@@ -299,14 +315,12 @@ class VisualSystem {
       ctx.save();
       ctx.translate(x, y);
       
-      // Rotación individual de cada geometría
       const rot = p.role === "experience" 
         ? (this.time * 0.5 + p.baseAngle) 
         : (-this.time * 1.5 + p.baseAngle);
       ctx.rotate(rot);
 
       if (p.role === "experience") {
-        // GEOMETRÍA DE EXPERIENCIA: Rombo sólido anclado
         ctx.strokeStyle = rgba(color, alpha * 0.5);
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -327,7 +341,6 @@ class VisualSystem {
         ctx.fill();
 
       } else {
-        // GEOMETRÍA DE JUVENTUD: Triángulo ágil de dirección
         ctx.strokeStyle = rgba(color, alpha * 0.5);
         ctx.lineWidth = 1.5;
         ctx.beginPath();
