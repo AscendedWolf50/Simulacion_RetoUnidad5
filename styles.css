@@ -131,11 +131,10 @@ button {
 }
 
 .stage.is-title-moment .eyebrow {
-  display: block;
+  display: inline-flex;
   max-width: 100%;
   margin-bottom: clamp(12px, 1.6vh, 18px);
   color: rgba(8, 169, 221, 0.92);
-  font-size: clamp(11px, 1vw, 15px);
 }
 
 .stage.is-title-moment h1 {
@@ -153,12 +152,30 @@ button {
 }
 
 .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0 0 18px;
+  padding: 4px 14px;
+  border: 1px solid rgba(8, 169, 221, 0.35);
+  border-radius: 999px;
+  background: rgba(8, 169, 221, 0.08);
   color: var(--accent);
-  font-size: clamp(12px, 1.15vw, 17px);
+  font-size: clamp(11px, 1vw, 15px);
   font-weight: 750;
-  letter-spacing: 0;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
 }
 
 h1 {

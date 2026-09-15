@@ -36,7 +36,6 @@ class VisualSystem {
     this.colors = ["#08a9dd", "#f7353f", "#e96daa"];
     
     // Inicialización del Talento (Nodos Controlados)
-    // Se divide equitativamente: la mitad es experiencia, la mitad es juventud
     this.particles = Array.from({ length: CONFIG.particleCount }, (_, i) => {
       const isExperience = i % 2 === 0;
       return {
@@ -46,10 +45,10 @@ class VisualSystem {
         targetX: 0.5,
         targetY: 0.5,
         role: isExperience ? "experience" : "youth",
-        baseAngle: (i / CONFIG.particleCount) * TAU, // Distribución circular perfecta
-        baseRadius: isExperience ? 0.2 : 0.4,        // Experiencia al centro, jóvenes afuera
+        baseAngle: (i / CONFIG.particleCount) * TAU, 
+        baseRadius: isExperience ? 0.2 : 0.4,        
         lane: i % 3,
-        pulseOffset: Math.random() // Desfase para que los pulsos de luz no sean idénticos
+        pulseOffset: Math.random() 
       };
     });
 
@@ -79,7 +78,6 @@ class VisualSystem {
   update() {
     this.time += 1 / 60;
     
-    // Suavizado elegante de las propiedades globales
     for (const key of Object.keys(this.params)) {
       this.params[key] = lerp(this.params[key], this.target[key], CONFIG.transitionSpeed);
     }
@@ -88,8 +86,8 @@ class VisualSystem {
   }
 
   calculateTargets() {
-    const cx = 0.64; // Centro visual X corrido un poco a la derecha (por los textos)
-    const cy = 0.46; // Centro visual Y
+    const cx = 0.64; 
+    const cy = 0.46; 
     const t = this.time * this.params.rotation;
     const structure = this.target.structure || "loose_ring";
     
@@ -97,13 +95,12 @@ class VisualSystem {
 
     for (let i = 0; i < pCount; i++) {
       const p = this.particles[i];
-      let tx = cx, ty = cy; // Variables temporales para el Target
+      let tx = cx, ty = cy; 
       
       const angle = p.baseAngle + t;
       const aspect = this.height / this.width;
 
       if (structure === "grid") {
-        // Cuadrícula rígida institucional (Slide 2)
         const cols = Math.floor(Math.sqrt(pCount));
         const row = Math.floor(i / cols);
         const col = i % cols;
@@ -111,48 +108,40 @@ class VisualSystem {
         ty = 0.25 + (row / cols) * 0.6 * this.params.spread;
       } 
       else if (structure === "triad_clusters" || structure === "triad_impact") {
-        // 3 Actores (Academia, Industria, Ciudad)
         const centers = [{x: 0.55, y: 0.3}, {x: 0.8, y: 0.6}, {x: 0.45, y: 0.65}];
         const center = centers[p.lane];
         const r = (p.role === "experience" ? 0.05 : 0.12) * this.params.spread;
-        // Impacto genera una pequeña expansión rítmica
         const impactPulse = structure === "triad_impact" ? Math.sin(t * 10 + p.lane) * 0.03 : 0;
         tx = center.x + Math.cos(angle * 2) * (r + impactPulse) * aspect;
         ty = center.y + Math.sin(angle * 2) * (r + impactPulse);
       }
       else if (structure === "dual_rings") {
-        // Dos generaciones separadas
         const r = (p.role === "experience" ? 0.15 : 0.35) * this.params.spread;
-        // Giran en direcciones opuestas
         const a = p.role === "experience" ? angle : -angle;
         tx = cx + Math.cos(a) * r * aspect;
         ty = cy + Math.sin(a) * r;
       }
       else if (structure === "interlocking_rings") {
-        // Se cruzan en un patrón de 8 (Lissajous) u órbitas elípticas rotadas
         const r = 0.25 * this.params.spread;
         if (p.role === "experience") {
           tx = cx + Math.cos(angle) * r * aspect;
-          ty = cy + Math.sin(angle * 2) * r * 0.5; // Órbita vertical
+          ty = cy + Math.sin(angle * 2) * r * 0.5; 
         } else {
-          tx = cx + Math.cos(angle * 2) * r * 1.5 * aspect; // Órbita horizontal
+          tx = cx + Math.cos(angle * 2) * r * 1.5 * aspect; 
           ty = cy + Math.sin(angle) * r;
         }
       }
       else if (structure === "orbital_routes") {
-        // La juventud explora, la experiencia es ancla
         if (p.role === "experience") {
           tx = cx + Math.cos(angle * 0.5) * 0.08 * aspect;
           ty = cy + Math.sin(angle * 0.5) * 0.08;
         } else {
-          // Rutas amplias y elípticas
           const routeAngle = p.baseAngle + (t * 2);
           tx = cx + Math.cos(routeAngle) * 0.45 * aspect * this.params.spread;
           ty = cy + Math.sin(routeAngle) * 0.3 * this.params.spread;
         }
       }
       else if (structure === "mandala") {
-        // Estructura Geométrica Perfecta para el Futuro Construido
         const rings = p.role === "experience" ? 1 : 3;
         const r = (0.15 * rings) * this.params.spread;
         const a = angle * (p.role === "experience" ? 1 : -1.5);
@@ -160,19 +149,16 @@ class VisualSystem {
         ty = cy + Math.sin(a) * r;
       }
       else if (structure === "youth_forward") {
-        // Jóvenes pasan al frente ampliándose
         const r = p.role === "youth" ? 0.3 * this.params.spread : 0.1;
         tx = cx + Math.cos(angle) * r * aspect;
         ty = cy + Math.sin(angle) * r;
       }
       else {
-        // constelación / nubes
         const r = p.baseRadius * this.params.spread * (1 + Math.sin(t * 2 + p.baseAngle)*0.1);
         tx = cx + Math.cos(angle) * r * aspect;
         ty = cy + Math.sin(angle) * r;
       }
 
-      // Aplicar interpolación (Lerp) para movimiento siempre controlado y súper suave
       p.x = lerp(p.x, tx, CONFIG.transitionSpeed * 1.5);
       p.y = lerp(p.y, ty, CONFIG.transitionSpeed * 1.5);
     }
@@ -195,10 +181,7 @@ class VisualSystem {
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
 
-    // 1. Dibujar la Malla y los Pulsos (La "Confianza" y "Trabajo en equipo")
     this.drawConstellation(ctx);
-    
-    // 2. Dibujar Nodos (Las Personas / Talento)
     this.drawNodes(ctx);
 
     ctx.restore();
@@ -212,7 +195,6 @@ class VisualSystem {
         this.width * 0.64, this.height * 0.48, 0,
         this.width * 0.64, this.height * 0.48, this.width * 0.48
       );
-      // Brillo muy tenue para dejar ver bien las fotos
       haze.addColorStop(0, rgba(this.colors[1], 0.04 + this.params.intensity * 0.03));
       haze.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = haze;
@@ -237,11 +219,9 @@ class VisualSystem {
       const x1 = p1.x * this.width;
       const y1 = p1.y * this.height;
 
-      // Evaluamos conexiones con otros nodos
       for (let j = i + 1; j < this.particles.length; j++) {
         const p2 = this.particles[j];
         
-        // Regla: En estado de Dualidad (separados), no hay conexiones entre generaciones
         if (this.target.structure === "dual_rings" && p1.role !== p2.role) continue;
 
         const x2 = p2.x * this.width;
@@ -249,13 +229,10 @@ class VisualSystem {
         const d = Math.hypot(x2 - x1, y2 - y1);
 
         if (d < maxDist) {
-          // Fuerza de la conexión
           const strength = 1 - (d / maxDist);
-          // Opacidad base muy delicada (elegante y no invasiva)
           const baseAlpha = strength * this.params.linkOpacity * 0.3; 
           const color = this.colors[(p1.lane + p2.lane) % this.colors.length];
 
-          // DIBUJAR LÍNEA
           if (baseAlpha > 0.01) {
             ctx.strokeStyle = rgba(color, baseAlpha);
             ctx.lineWidth = 1;
@@ -265,26 +242,30 @@ class VisualSystem {
             ctx.stroke();
           }
 
-          // DIBUJAR PULSOS DE INFORMACIÓN (Confianza / Crecimiento)
           if (this.params.pulseRate > 0.1) {
-            // Calculamos un punto a lo largo de la línea que viaja con el tiempo
             const pulseSpeed = 1.5;
-            // Usamos el ID y el offset para que los pulsos no se vean idénticos o robóticos
             const tOffset = p1.pulseOffset + (p2.id * 0.1); 
             const routeProgress = ((this.time * pulseSpeed) + tOffset) % 1; 
 
-            // Solo mostrar pulsos en el segmento central de la línea (para que nazcan y mueran suavemente)
             if (routeProgress > 0.1 && routeProgress < 0.9 && strength > 0.3) {
               const pulseX = lerp(x1, x2, routeProgress);
               const pulseY = lerp(y1, y2, routeProgress);
-              
-              // Fade in / Fade out del pulso
               const pulseAlpha = Math.sin(routeProgress * Math.PI) * this.params.pulseRate * strength * 0.8;
               
+              // Pulsos de energía (ahora son rombos de luz en lugar de círculos)
+              ctx.save();
+              ctx.translate(pulseX, pulseY);
+              ctx.rotate(this.time * 3); // Giran rápidamente al viajar
               ctx.fillStyle = rgba(color, pulseAlpha);
               ctx.beginPath();
-              ctx.arc(pulseX, pulseY, 2.5, 0, TAU); // Bolita de luz viajando
+              const pSize = 2.5;
+              ctx.moveTo(0, -pSize);
+              ctx.lineTo(pSize, 0);
+              ctx.lineTo(0, pSize);
+              ctx.lineTo(-pSize, 0);
+              ctx.closePath();
               ctx.fill();
+              ctx.restore();
             }
           }
         }
@@ -300,7 +281,6 @@ class VisualSystem {
       const x = p.x * this.width;
       const y = p.y * this.height;
 
-      // Color Semántico
       let color = this.colors[p.lane];
       if (isDuality) {
         color = p.role === "youth" ? CONFIG.palette.eventCyan : CONFIG.palette.eventSilver;
@@ -311,22 +291,62 @@ class VisualSystem {
 
       const alpha = 0.6 + this.params.intensity * 0.4;
       
-      // La juventud es pequeña (agilidad), la experiencia es grande (estabilidad/ancla)
-      const baseR = p.role === "experience" ? 4 : 2.5; 
+      // Ajuste de tamaño para las formas poligonales
+      const baseSize = p.role === "experience" ? 4.5 : 3.5; 
       const pulse = 1 + Math.sin(this.time * 2 + p.baseAngle) * 0.2;
-      const radius = baseR * pulse;
+      const size = baseSize * pulse;
 
-      // Halo Suave Exterior
-      ctx.fillStyle = rgba(color, alpha * 0.4);
-      ctx.beginPath();
-      ctx.arc(x, y, radius * 2.5, 0, TAU);
-      ctx.fill();
+      ctx.save();
+      ctx.translate(x, y);
+      
+      // Rotación individual de cada geometría
+      const rot = p.role === "experience" 
+        ? (this.time * 0.5 + p.baseAngle) 
+        : (-this.time * 1.5 + p.baseAngle);
+      ctx.rotate(rot);
 
-      // Núcleo Sólido Minimalista
-      ctx.fillStyle = rgba("#ffffff", alpha);
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, TAU);
-      ctx.fill();
+      if (p.role === "experience") {
+        // GEOMETRÍA DE EXPERIENCIA: Rombo sólido anclado
+        ctx.strokeStyle = rgba(color, alpha * 0.5);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -size * 1.8);
+        ctx.lineTo(size * 1.8, 0);
+        ctx.lineTo(0, size * 1.8);
+        ctx.lineTo(-size * 1.8, 0);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.fillStyle = rgba("#ffffff", alpha);
+        ctx.beginPath();
+        ctx.moveTo(0, -size * 0.8);
+        ctx.lineTo(size * 0.8, 0);
+        ctx.lineTo(0, size * 0.8);
+        ctx.lineTo(-size * 0.8, 0);
+        ctx.closePath();
+        ctx.fill();
+
+      } else {
+        // GEOMETRÍA DE JUVENTUD: Triángulo ágil de dirección
+        ctx.strokeStyle = rgba(color, alpha * 0.5);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -size * 1.6);
+        ctx.lineTo(size * 1.4, size * 1.2);
+        ctx.lineTo(-size * 1.4, size * 1.2);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.fillStyle = rgba("#ffffff", alpha);
+        ctx.beginPath();
+        ctx.moveTo(0, -size * 0.8);
+        ctx.lineTo(size * 0.7, size * 0.6);
+        ctx.lineTo(-size * 0.7, size * 0.6);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.restore();
     }
   }
 }
