@@ -1,3 +1,4 @@
+// visualSystem.js - Sistema de Fuego Prometeico Reconceptualizado
 const TAU = Math.PI * 2;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -8,9 +9,10 @@ function hexToRgb(hex) {
   const n = parseInt(clean, 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 }
+
 function rgba(hex, alpha) {
   const { r, g, b } = hexToRgb(hex);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  return `rgba(${r}, ${g}, ${b}, ${clamp(alpha, 0, 1)})`;
 }
 
 class VisualSystem {
@@ -21,7 +23,7 @@ class VisualSystem {
     this.height = 1;
     this.dpr = 1;
     this.time = 0;
-    
+
     this.params = {
       linkOpacity: 0.1,
       pulseRate: 0.0,
@@ -31,24 +33,27 @@ class VisualSystem {
       centerX: 0.65,
       centerY: 0.48,
     };
-    
+
     this.target = { ...this.params, structure: "loose_ring" };
     this.current = null;
-    this.colors = ["#08a9dd", "#f7353f", "#e96daa"];
-    
-    this.particles = Array.from({ length: CONFIG.particleCount }, (_, i) => {
+    this.colors = ["#ff9800", "#f7353f", "#08a9dd"];
+
+    this.particleCount = CONFIG.particleCount || 180;
+    this.particles = Array.from({ length: this.particleCount }, (_, i) => {
       const isExperience = i % 2 === 0;
       return {
         id: i,
-        x: Math.random(), 
-        y: Math.random(),
-        targetX: 0.5,
-        targetY: 0.5,
+        x: 0.5,
+        y: 0.5,
+        currX: 0.5,
+        currY: 0.5,
+        life: Math.random(),
+        maxLife: 0.6 + Math.random() * 0.8,
+        size: 14 + Math.random() * 22,
         role: isExperience ? "experience" : "youth",
-        baseAngle: (i / CONFIG.particleCount) * TAU, 
-        baseRadius: isExperience ? 0.2 : 0.4,        
-        lane: i % 3,
-        pulseOffset: Math.random() 
+        lane: i % 3, // 0: Academia (Dorado), 1: Industria (Rojo), 2: Ciudad (Cian)
+        seed: Math.random() * TAU,
+        flickerSpeed: 4 + Math.random() * 6,
       };
     });
 
@@ -68,23 +73,18 @@ class VisualSystem {
 
   setMoment(moment) {
     this.current = moment;
-    this.colors = moment.colors;
+    this.colors = moment.colors || this.colors;
 
     let targetCx = 0.65;
     let targetCy = 0.48;
 
-    if (moment.layout === "right") {
-      targetCx = 0.30;
-    } else if (moment.layout === "center") {
-      targetCx = 0.50;
-      targetCy = 0.45;
-    } else if (moment.layout === "left") {
-      targetCx = 0.70;
-    }
+    if (moment.layout === "right") targetCx = 0.3;
+    else if (moment.layout === "center") targetCx = 0.5;
+    else if (moment.layout === "left") targetCx = 0.7;
 
     this.target = {
       ...moment.behavior,
-      intensity: moment.intensity,
+      intensity: moment.intensity ?? 0.5,
       centerX: targetCx,
       centerY: targetCy,
     };
@@ -92,94 +92,149 @@ class VisualSystem {
 
   update() {
     this.time += 1 / 60;
-    
+
     for (const key of Object.keys(this.params)) {
       this.params[key] = lerp(this.params[key], this.target[key], CONFIG.transitionSpeed);
     }
-    
-    this.calculateTargets();
+
+    this.updateFlameEmitterPositions();
   }
 
-  calculateTargets() {
-    const cx = this.params.centerX; 
-    const cy = this.params.centerY; 
-    const t = this.time * this.params.rotation;
-    const structure = this.target.structure || "loose_ring";
-    
+  updateFlameEmitterPositions() {
+    const cx = this.params.centerX;
+    const cy = this.params.centerY;
+    const t = this.time;
+    const momentId = this.current?.id || "";
+    const struct = this.target.structure || "loose_ring";
     const pCount = this.particles.length;
+    const aspect = this.height / this.width;
 
     for (let i = 0; i < pCount; i++) {
       const p = this.particles[i];
-      let tx = cx, ty = cy; 
-      
-      const angle = p.baseAngle + t;
-      const aspect = this.height / this.width;
+      let baseTx = cx;
+      let baseTy = cy;
+      const norm = i / pCount;
+      const angle = (i / pCount) * TAU + t * 0.3;
 
-      if (structure === "grid") {
-        const cols = Math.floor(Math.sqrt(pCount));
-        const row = Math.floor(i / cols);
-        const col = i % cols;
-        tx = (cx - 0.2) + (col / cols) * 0.4 * this.params.spread;
-        ty = (cy - 0.2) + (row / cols) * 0.4 * this.params.spread;
+      // SLIDE 1: Título Principal - Antorcha central equilibrada (MANTENIDA)
+      if (momentId === "relevo-generacional" || struct === "loose_ring") {
+        const fH = norm * 0.38;
+        const fW = Math.sin(norm * Math.PI) * 0.038 * aspect;
+        baseTx = cx + (i % 2 === 0 ? fW : -fW);
+        baseTy = cy + 0.16 - fH;
       } 
-      else if (structure === "triad_clusters" || structure === "triad_impact") {
-        const centers = [
-          { x: cx - 0.1, y: cy - 0.15 }, 
-          { x: cx + 0.15, y: cy + 0.1 }, 
-          { x: cx - 0.15, y: cy + 0.15 }
-        ];
-        const center = centers[p.lane];
-        const r = (p.role === "experience" ? 0.05 : 0.12) * this.params.spread;
-        const impactPulse = structure === "triad_impact" ? Math.sin(t * 10 + p.lane) * 0.03 : 0;
-        tx = center.x + Math.cos(angle * 2) * (r + impactPulse) * aspect;
-        ty = center.y + Math.sin(angle * 2) * (r + impactPulse);
-      }
-      else if (structure === "dual_rings") {
-        const r = (p.role === "experience" ? 0.15 : 0.35) * this.params.spread;
-        const a = p.role === "experience" ? angle : -angle;
-        tx = cx + Math.cos(a) * r * aspect;
-        ty = cy + Math.sin(a) * r;
-      }
-      else if (structure === "interlocking_rings") {
-        const r = 0.25 * this.params.spread;
+      // SLIDE 2: Auditorio de Grados - Lecho plano de brasas ordenadas en el escenario
+      else if (momentId === "auditorio-grados" || struct === "grid") {
+        const stageW = 0.65;
+        baseTx = cx - stageW / 2 + norm * stageW;
+        baseTy = cy + 0.26 + Math.sin(norm * Math.PI * 4 + t) * 0.01;
+      } 
+      // SLIDE 3: Universidad y Mundo - Expansión horizontal simétrica desde el foco universitario hacia ambos lados del mundo
+      else if (momentId === "universidad-mundo" || struct === "expanding_cloud") {
+        const dir = i % 2 === 0 ? 1 : -1;
+        const spreadDist = Math.pow(norm, 0.85) * 0.38 * aspect;
+        baseTx = cx + dir * spreadDist;
+        baseTy = cy + 0.16 - Math.sin(norm * Math.PI) * 0.1;
+      } 
+      // SLIDE 4: Academia + Industria + Ciudad - 3 Antorchas desplazadas sutilmente a la izquierda
+      else if (momentId === "academia-industria-ciudad" || struct === "triad_clusters") {
+        const centers = [cx - 0.30, cx - 0.08, cx + 0.14];
+        const torchX = centers[p.lane];
+        const subNorm = (i % 30) / 30;
+        const fH = subNorm * 0.32;
+        const fW = Math.sin(subNorm * Math.PI) * 0.035 * aspect;
+        baseTx = torchX + (i % 2 === 0 ? fW : -fW);
+        baseTy = cy + 0.15 - fH;
+      } 
+      // SLIDE 5: El Impacto - Columna masiva de fuego central, pulsante y de gran potencia
+      else if (momentId === "impacto" || struct === "triad_impact") {
+        const fH = norm * 0.65;
+        const pulse = Math.sin(t * 4 + norm * 6) * 0.025 * aspect;
+        const fW = (Math.sin(norm * Math.PI) * 0.14 + pulse) * aspect;
+        baseTx = cx + (i % 2 === 0 ? fW : -fW);
+        baseTy = cy + 0.28 - fH;
+      } 
+      // SLIDE 6: Comunidad - Hoguera circular/Fogón comunitario
+      else if (momentId === "comunidad" || struct === "constellation") {
+        const hearthR = 0.18 * aspect;
+        baseTx = cx + Math.cos(angle) * hearthR;
+        baseTy = cy + 0.08 + Math.sin(angle) * (hearthR / aspect) * 0.4;
+      } 
+      // SLIDE 7: Confianza - Traza diagonal en 45° de alta velocidad (Crecimiento acelerado hacia arriba a la derecha)
+      else if (momentId === "confianza") {
+        const jetAngle = -Math.PI / 4;
+        const jetLen = norm * 0.62;
+        const thickness = Math.sin(norm * Math.PI) * 0.022 * aspect;
+        baseTx = cx - 0.18 + Math.cos(jetAngle) * jetLen * aspect + (i % 2 === 0 ? thickness : -thickness);
+        baseTy = cy + 0.24 + Math.sin(jetAngle) * jetLen;
+      } 
+      // SLIDE 8: Nuevas Rutas - MANTENIDA CON DESPLAZAMIENTO A LA DERECHA (+0.12)
+      else if (momentId === "nuevas-rutas" || struct === "orbital_routes") {
+        const shiftX = cx + 0.12; 
         if (p.role === "experience") {
-          tx = cx + Math.cos(angle) * r * aspect;
-          ty = cy + Math.sin(angle * 2) * r * 0.5; 
+          baseTx = shiftX + Math.cos(angle) * 0.08 * aspect;
+          baseTy = cy + 0.18 + Math.sin(angle) * 0.03;
         } else {
-          tx = cx + Math.cos(angle * 2) * r * 1.5 * aspect; 
-          ty = cy + Math.sin(angle) * r;
+          const spiralA = norm * TAU * 2.8 + t * 1.5;
+          baseTx = shiftX + Math.cos(spiralA) * (norm * 0.35) * aspect;
+          baseTy = cy + 0.18 - norm * 0.52;
         }
-      }
-      else if (structure === "orbital_routes") {
-        if (p.role === "experience") {
-          tx = cx + Math.cos(angle * 0.5) * 0.08 * aspect;
-          ty = cy + Math.sin(angle * 0.5) * 0.08;
-        } else {
-          const routeAngle = p.baseAngle + (t * 2);
-          tx = cx + Math.cos(routeAngle) * 0.45 * aspect * this.params.spread;
-          ty = cy + Math.sin(routeAngle) * 0.3 * this.params.spread;
-        }
-      }
-      else if (structure === "mandala") {
-        const rings = p.role === "experience" ? 1 : 3;
-        const r = (0.15 * rings) * this.params.spread;
-        const a = angle * (p.role === "experience" ? 1 : -1.5);
-        tx = cx + Math.cos(a) * r * aspect;
-        ty = cy + Math.sin(a) * r;
-      }
-      else if (structure === "youth_forward") {
-        const r = p.role === "youth" ? 0.3 * this.params.spread : 0.1;
-        tx = cx + Math.cos(angle) * r * aspect;
-        ty = cy + Math.sin(angle) * r;
-      }
-      else {
-        const r = p.baseRadius * this.params.spread * (1 + Math.sin(t * 2 + p.baseAngle)*0.1);
-        tx = cx + Math.cos(angle) * r * aspect;
-        ty = cy + Math.sin(angle) * r;
+      } 
+      // SLIDE 9: Dos Generaciones - Antorcha Dorada Izq y Azul Der (MANTENIDA)
+      else if (momentId === "vision-generaciones" || struct === "dual_rings") {
+        const isExp = p.role === "experience";
+        const flameCx = isExp ? cx - 0.22 : cx + 0.22;
+        const subNorm = (i % 40) / 40;
+        const fH = subNorm * 0.38;
+        const fW = Math.sin(subNorm * Math.PI) * 0.045 * aspect;
+        baseTx = flameCx + (i % 2 === 0 ? fW : -fW);
+        baseTy = cy + 0.14 - fH;
+      } 
+      // SLIDE 10: Trabajan Juntas - Vórtice helicoidal entrelazado (MANTENIDA)
+      else if (momentId === "trabajan-juntas" || struct === "interlocking_rings") {
+        const strandPhase = p.role === "experience" ? 0 : Math.PI;
+        const fH = (norm - 0.5) * 0.58;
+        const twist = norm * Math.PI * 4.5 + t * 2.2 + strandPhase;
+        baseTx = cx + Math.sin(twist) * 0.1 * aspect;
+        baseTy = cy - fH;
+      } 
+      // SLIDE 11: Presente Joven - Llama azul cian gigante emergente en primer plano
+      else if (momentId === "presente-joven" || struct === "youth_forward") {
+        const fH = norm * 0.58;
+        const fW = Math.sin(norm * Math.PI) * 0.08 * aspect;
+        baseTx = cx + (i % 2 === 0 ? fW : -fW);
+        baseTy = cy + 0.22 - fH;
+      } 
+      // SLIDE 12: El Futuro se Construye - Portal / Arco triunfal de fuego simétrico
+      else if (momentId === "futuro-construido" || struct === "mandala") {
+        const arcA = norm * Math.PI;
+        const archR = 0.32;
+        const thickness = (i % 2 === 0 ? 0.018 : -0.018) * aspect;
+        baseTx = cx + Math.cos(arcA) * archR * aspect + thickness;
+        baseTy = cy + 0.2 - Math.sin(arcA) * archR;
+      } 
+      // SLIDE 13: Cierre QR - Fuego despejado en las esquinas inferiores
+      else if (momentId === "qr-cierre") {
+        const side = i % 2 === 0 ? 0.12 : 0.88;
+        const fH = norm * 0.25;
+        baseTx = side + (i % 4 === 0 ? 0.02 : -0.02);
+        baseTy = cy + 0.25 - fH;
       }
 
-      p.x = lerp(p.x, tx, CONFIG.transitionSpeed * 1.5);
-      p.y = lerp(p.y, ty, CONFIG.transitionSpeed * 1.5);
+      p.currX = lerp(p.currX, baseTx, CONFIG.transitionSpeed * 1.5);
+      p.currY = lerp(p.currY, baseTy, CONFIG.transitionSpeed * 1.5);
+
+      p.life += 0.015;
+      if (p.life > p.maxLife) {
+        p.life = 0;
+      }
+
+      const lifeNorm = p.life / p.maxLife;
+      const draftY = -lifeNorm * 0.08;
+      const turbulenceX = Math.sin(t * p.flickerSpeed + p.seed) * 0.008 * (1 - lifeNorm);
+
+      p.x = p.currX + turbulenceX;
+      p.y = p.currY + draftY;
     }
   }
 
@@ -192,16 +247,17 @@ class VisualSystem {
   render() {
     this.update();
     const ctx = this.ctx;
-    const hasBg = this.hasBackgroundAsset();
+    const w = this.width;
+    const h = this.height;
 
-    ctx.clearRect(0, 0, this.width, this.height);
-    this.drawBackground(ctx, hasBg);
+    ctx.clearRect(0, 0, w, h);
+    this.drawBackground(ctx, this.hasBackgroundAsset());
 
     ctx.save();
     ctx.globalCompositeOperation = "lighter";
 
-    this.drawConstellation(ctx);
-    this.drawNodes(ctx);
+    this.drawFlameTongues(ctx);
+    this.drawAscendingEmbers(ctx);
 
     ctx.restore();
   }
@@ -215,180 +271,115 @@ class VisualSystem {
     if (hasBackgroundAsset) {
       ctx.save();
       ctx.globalCompositeOperation = "lighter";
-      
-      const mainGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.55);
-      mainGlow.addColorStop(0, rgba(this.colors[0], 0.1 + this.params.intensity * 0.05));
-      mainGlow.addColorStop(0.5, rgba(this.colors[1] || this.colors[0], 0.04));
+      const mainGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.5);
+      mainGlow.addColorStop(0, "rgba(255, 120, 0, 0.12)");
       mainGlow.addColorStop(1, "rgba(0,0,0,0)");
-      
       ctx.fillStyle = mainGlow;
       ctx.fillRect(0, 0, w, h);
       ctx.restore();
       return;
     }
 
-    // FONDOS DINÁMICOS CON DOBLE FUENTE DE LUZ ATMOSFÉRICA
     const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-    bgGrad.addColorStop(0, "#040506");
-    bgGrad.addColorStop(1, "#0a0c0e");
+    bgGrad.addColorStop(0, "#030405");
+    bgGrad.addColorStop(1, "#0a0604");
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
-    ctx.save();
-    ctx.globalCompositeOperation = "screen";
-
-    // Foco Principal: Sigue el centro visual del momento
-    const pulse = Math.sin(this.time * 0.8) * 0.04;
-    const r1 = w * (0.42 + pulse);
-    const glow1 = ctx.createRadialGradient(cx, cy, 0, cx, cy, r1);
-    glow1.addColorStop(0, rgba(this.colors[0], 0.18 + this.params.intensity * 0.08));
-    glow1.addColorStop(0.55, rgba(this.colors[1] || this.colors[0], 0.06));
-    glow1.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = glow1;
+    const heatGlow = ctx.createRadialGradient(cx, cy + h * 0.08, 10, cx, cy, w * 0.45);
+    heatGlow.addColorStop(0, "rgba(255, 90, 0, 0.16)");
+    heatGlow.addColorStop(0.5, "rgba(180, 25, 0, 0.05)");
+    heatGlow.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = heatGlow;
     ctx.fillRect(0, 0, w, h);
-
-    // Reflector Secundario de Contrapunto en Esquina Opuesta
-    const oppCx = w * (1 - this.params.centerX * 0.75);
-    const oppCy = h * (1 - this.params.centerY * 0.75);
-    const glow2 = ctx.createRadialGradient(oppCx, oppCy, 0, oppCx, oppCy, w * 0.45);
-    glow2.addColorStop(0, rgba(this.colors[2] || this.colors[0], 0.12));
-    glow2.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = glow2;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.restore();
   }
 
-  drawConstellation(ctx) {
-    const maxDist = CONFIG.connectionDistance;
-    
-    for (let i = 0; i < this.particles.length; i++) {
-      const p1 = this.particles[i];
-      const x1 = p1.x * this.width;
-      const y1 = p1.y * this.height;
+  drawFlameTongues(ctx) {
+    const momentId = this.current?.id || "";
+    const isTriad = momentId === "academia-industria-ciudad" || this.target.structure === "triad_clusters";
+    const isDual = momentId === "vision-generaciones" || this.target.structure === "dual_rings";
+    const isInterlocking = momentId === "trabajan-juntas" || this.target.structure === "interlocking_rings";
+    const isYouthPresent = momentId === "presente-joven" || this.target.structure === "youth_forward";
 
-      for (let j = i + 1; j < this.particles.length; j++) {
-        const p2 = this.particles[j];
-        
-        if (this.target.structure === "dual_rings" && p1.role !== p2.role) continue;
+    for (const p of this.particles) {
+      const px = p.x * this.width;
+      const py = p.y * this.height;
 
-        const x2 = p2.x * this.width;
-        const y2 = p2.y * this.height;
-        const d = Math.hypot(x2 - x1, y2 - y1);
+      const lifeNorm = p.life / p.maxLife;
+      const fadeInOut = Math.sin(lifeNorm * Math.PI);
+      const currentRadius = p.size * (1 - lifeNorm * 0.5) * (0.8 + fadeInOut * 0.4);
 
-        if (d < maxDist) {
-          const strength = 1 - (d / maxDist);
-          const baseAlpha = strength * this.params.linkOpacity * 0.3; 
-          const color = this.colors[(p1.lane + p2.lane) % this.colors.length];
+      if (currentRadius <= 0) continue;
 
-          if (baseAlpha > 0.01) {
-            ctx.strokeStyle = rgba(color, baseAlpha);
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.stroke();
-          }
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.scale(0.7, 1.6);
 
-          if (this.params.pulseRate > 0.1) {
-            const pulseSpeed = 1.5;
-            const tOffset = p1.pulseOffset + (p2.id * 0.1); 
-            const routeProgress = ((this.time * pulseSpeed) + tOffset) % 1; 
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, currentRadius);
 
-            if (routeProgress > 0.1 && routeProgress < 0.9 && strength > 0.3) {
-              const pulseX = lerp(x1, x2, routeProgress);
-              const pulseY = lerp(y1, y2, routeProgress);
-              const pulseAlpha = Math.sin(routeProgress * Math.PI) * this.params.pulseRate * strength * 0.8;
-              
-              ctx.save();
-              ctx.translate(pulseX, pulseY);
-              ctx.rotate(this.time * 3);
-              ctx.fillStyle = rgba(color, pulseAlpha);
-              ctx.beginPath();
-              const pSize = 2.5;
-              ctx.moveTo(0, -pSize);
-              ctx.lineTo(pSize, 0);
-              ctx.lineTo(0, pSize);
-              ctx.lineTo(-pSize, 0);
-              ctx.closePath();
-              ctx.fill();
-              ctx.restore();
-            }
-          }
+      // SLIDE 4: SINERGIA TRIPLE (Academia: Dorado, Industria: Rojo, Ciudad: Cian)
+      if (isTriad) {
+        if (p.lane === 0) {
+          grad.addColorStop(0.0, `rgba(255, 255, 240, ${fadeInOut * 0.98})`);
+          grad.addColorStop(0.25, `rgba(255, 170, 0, ${fadeInOut * 0.85})`);
+          grad.addColorStop(0.6, `rgba(200, 80, 0, ${fadeInOut * 0.4})`);
+          grad.addColorStop(1.0, "rgba(100, 30, 0, 0)");
+        } else if (p.lane === 1) {
+          grad.addColorStop(0.0, `rgba(255, 240, 245, ${fadeInOut * 0.98})`);
+          grad.addColorStop(0.25, `rgba(247, 53, 63, ${fadeInOut * 0.85})`);
+          grad.addColorStop(0.6, `rgba(180, 10, 30, ${fadeInOut * 0.4})`);
+          grad.addColorStop(1.0, "rgba(90, 0, 15, 0)");
+        } else {
+          grad.addColorStop(0.0, `rgba(240, 255, 255, ${fadeInOut * 0.98})`);
+          grad.addColorStop(0.25, `rgba(8, 169, 221, ${fadeInOut * 0.85})`);
+          grad.addColorStop(0.6, `rgba(0, 90, 180, ${fadeInOut * 0.4})`);
+          grad.addColorStop(1.0, "rgba(0, 30, 90, 0)");
         }
+      } 
+      // SLIDE 11: PRESENTE JOVEN (Llama Azul/Cian Protagónica)
+      else if (isYouthPresent) {
+        grad.addColorStop(0.0, `rgba(240, 255, 255, ${fadeInOut * 0.98})`);
+        grad.addColorStop(0.2, `rgba(8, 169, 221, ${fadeInOut * 0.85})`);
+        grad.addColorStop(0.55, `rgba(0, 90, 200, ${fadeInOut * 0.45})`);
+        grad.addColorStop(1.0, "rgba(0, 20, 80, 0)");
       }
+      // SLIDE 9 & 10: DOS GENERACIONES / TRABAJAN JUNTAS (Dorada vs Azul)
+      else if ((isDual || isInterlocking) && p.role === "youth") {
+        grad.addColorStop(0.0, `rgba(255, 255, 255, ${fadeInOut * 0.95})`);
+        grad.addColorStop(0.2, `rgba(120, 225, 255, ${fadeInOut * 0.8})`);
+        grad.addColorStop(0.55, `rgba(8, 169, 221, ${fadeInOut * 0.45})`);
+        grad.addColorStop(1.0, "rgba(0, 50, 120, 0)");
+      } 
+      // RESTO DE SLIDES: Fuego Prometeico Cálido Tradicional
+      else {
+        grad.addColorStop(0.0, `rgba(255, 255, 240, ${fadeInOut * 0.98})`);
+        grad.addColorStop(0.22, `rgba(255, 180, 0, ${fadeInOut * 0.85})`);
+        grad.addColorStop(0.58, `rgba(247, 53, 63, ${fadeInOut * 0.4})`);
+        grad.addColorStop(1.0, "rgba(120, 0, 0, 0)");
+      }
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, currentRadius, 0, TAU);
+      ctx.fill();
+
+      ctx.restore();
     }
   }
 
-  drawNodes(ctx) {
-    const isDuality = this.target.structure === "dual_rings";
-    const isPresent = this.target.structure === "youth_forward";
+  drawAscendingEmbers(ctx) {
+    for (let i = 0; i < this.particles.length; i += 2) {
+      const p = this.particles[i];
+      const sparkProgress = (this.time * 2.2 + p.seed) % 1;
+      const px = p.x * this.width + Math.sin(sparkProgress * 8 + p.id) * 10;
+      const py = p.y * this.height - sparkProgress * 60;
+      const alpha = (1 - sparkProgress) * 0.85;
+      const sparkSize = (1 - sparkProgress) * 2.8;
 
-    for (const p of this.particles) {
-      const x = p.x * this.width;
-      const y = p.y * this.height;
-
-      let color = this.colors[p.lane];
-      if (isDuality) {
-        color = p.role === "youth" ? CONFIG.palette.eventCyan : CONFIG.palette.eventSilver;
-      }
-      if (isPresent && p.role === "youth") {
-        color = CONFIG.palette.eventRed;
-      }
-
-      const alpha = 0.6 + this.params.intensity * 0.4;
-      const baseSize = p.role === "experience" ? 4.5 : 3.5; 
-      const pulse = 1 + Math.sin(this.time * 2 + p.baseAngle) * 0.2;
-      const size = baseSize * pulse;
-
-      ctx.save();
-      ctx.translate(x, y);
-      
-      const rot = p.role === "experience" 
-        ? (this.time * 0.5 + p.baseAngle) 
-        : (-this.time * 1.5 + p.baseAngle);
-      ctx.rotate(rot);
-
-      if (p.role === "experience") {
-        ctx.strokeStyle = rgba(color, alpha * 0.5);
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(0, -size * 1.8);
-        ctx.lineTo(size * 1.8, 0);
-        ctx.lineTo(0, size * 1.8);
-        ctx.lineTo(-size * 1.8, 0);
-        ctx.closePath();
-        ctx.stroke();
-
-        ctx.fillStyle = rgba("#ffffff", alpha);
-        ctx.beginPath();
-        ctx.moveTo(0, -size * 0.8);
-        ctx.lineTo(size * 0.8, 0);
-        ctx.lineTo(0, size * 0.8);
-        ctx.lineTo(-size * 0.8, 0);
-        ctx.closePath();
-        ctx.fill();
-
-      } else {
-        ctx.strokeStyle = rgba(color, alpha * 0.5);
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(0, -size * 1.6);
-        ctx.lineTo(size * 1.4, size * 1.2);
-        ctx.lineTo(-size * 1.4, size * 1.2);
-        ctx.closePath();
-        ctx.stroke();
-
-        ctx.fillStyle = rgba("#ffffff", alpha);
-        ctx.beginPath();
-        ctx.moveTo(0, -size * 0.8);
-        ctx.lineTo(size * 0.7, size * 0.6);
-        ctx.lineTo(-size * 0.7, size * 0.6);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      ctx.restore();
+      ctx.fillStyle = `rgba(255, 230, 150, ${alpha})`;
+      ctx.beginPath();
+      ctx.arc(px, py, sparkSize, 0, TAU);
+      ctx.fill();
     }
   }
 }
