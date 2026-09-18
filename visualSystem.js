@@ -116,29 +116,30 @@ class VisualSystem {
       const norm = i / pCount;
       const angle = (i / pCount) * TAU + t * 0.3;
 
-      // SLIDE 1: Título Principal - Antorcha central equilibrada (MANTENIDA)
+      // SLIDE 1: Título Principal - Antorcha central equilibrada
       if (momentId === "relevo-generacional" || struct === "loose_ring") {
         const fH = norm * 0.38;
         const fW = Math.sin(norm * Math.PI) * 0.038 * aspect;
         baseTx = cx + (i % 2 === 0 ? fW : -fW);
         baseTy = cy + 0.16 - fH;
       } 
-      // SLIDE 2: Auditorio de Grados - Lecho plano de brasas ordenadas en el escenario
+      // SLIDE 2: Auditorio de Grados - Fuego tenue en la base
       else if (momentId === "auditorio-grados" || struct === "grid") {
         const stageW = 0.65;
         baseTx = cx - stageW / 2 + norm * stageW;
         baseTy = cy + 0.26 + Math.sin(norm * Math.PI * 4 + t) * 0.01;
       } 
-      // SLIDE 3: Universidad y Mundo - Expansión horizontal simétrica desde el foco universitario hacia ambos lados del mundo
+      // SLIDE 3: Universidad y Mundo - PUENTE DE FUEGO (Arco conectando dos puntos)
       else if (momentId === "universidad-mundo" || struct === "expanding_cloud") {
-        const dir = i % 2 === 0 ? 1 : -1;
-        const spreadDist = Math.pow(norm, 0.85) * 0.38 * aspect;
-        baseTx = cx + dir * spreadDist;
-        baseTy = cy + 0.16 - Math.sin(norm * Math.PI) * 0.1;
+        const arcProgress = norm;
+        const span = 0.5 * aspect; // Ancho del puente
+        const arcH = Math.sin(arcProgress * Math.PI) * 0.18; // Parábola invertida
+        baseTx = cx - span / 2 + arcProgress * span;
+        baseTy = cy + 0.2 - arcH;
       } 
-      // SLIDE 4: Academia + Industria + Ciudad - 3 Antorchas desplazadas sutilmente a la izquierda
+      // SLIDE 4: Academia + Industria + Ciudad - 3 Antorchas separadas y desplazadas
       else if (momentId === "academia-industria-ciudad" || struct === "triad_clusters") {
-        const centers = [cx - 0.30, cx - 0.08, cx + 0.14];
+        const centers = [cx - 0.32, cx - 0.08, cx + 0.16];
         const torchX = centers[p.lane];
         const subNorm = (i % 30) / 30;
         const fH = subNorm * 0.32;
@@ -146,29 +147,37 @@ class VisualSystem {
         baseTx = torchX + (i % 2 === 0 ? fW : -fW);
         baseTy = cy + 0.15 - fH;
       } 
-      // SLIDE 5: El Impacto - Columna masiva de fuego central, pulsante y de gran potencia
+      // SLIDE 5: El Impacto - Columna central fuerte con onda expansiva veloz en el suelo
       else if (momentId === "impacto" || struct === "triad_impact") {
-        const fH = norm * 0.65;
-        const pulse = Math.sin(t * 4 + norm * 6) * 0.025 * aspect;
-        const fW = (Math.sin(norm * Math.PI) * 0.14 + pulse) * aspect;
-        baseTx = cx + (i % 2 === 0 ? fW : -fW);
-        baseTy = cy + 0.28 - fH;
+        if (i % 3 === 0) {
+          // Onda expansiva rápida (Shockwave)
+          const shockwave = (norm + t * 2.5) % 1;
+          const radius = shockwave * 0.6 * aspect;
+          baseTx = cx + Math.cos(angle * 5) * radius;
+          baseTy = cy + 0.25 + Math.sin(angle * 5) * (radius * 0.15); // Anillo aplanado por la perspectiva
+        } else {
+          // Núcleo del impacto: Llama central, densa y contundente
+          const fH = norm * 0.55;
+          const fW = Math.sin(norm * Math.PI) * 0.07 * aspect;
+          baseTx = cx + (i % 2 === 0 ? fW : -fW);
+          baseTy = cy + 0.25 - fH;
+        }
       } 
-      // SLIDE 6: Comunidad - Hoguera circular/Fogón comunitario
+      // SLIDE 6: Comunidad - Hoguera circular / Fogón comunitario
       else if (momentId === "comunidad" || struct === "constellation") {
         const hearthR = 0.18 * aspect;
         baseTx = cx + Math.cos(angle) * hearthR;
         baseTy = cy + 0.08 + Math.sin(angle) * (hearthR / aspect) * 0.4;
       } 
-      // SLIDE 7: Confianza - Traza diagonal en 45° de alta velocidad (Crecimiento acelerado hacia arriba a la derecha)
+      // SLIDE 7: Confianza - Haz aerodinámico de altísima velocidad hacia arriba
       else if (momentId === "confianza") {
-        const jetAngle = -Math.PI / 4;
-        const jetLen = norm * 0.62;
-        const thickness = Math.sin(norm * Math.PI) * 0.022 * aspect;
-        baseTx = cx - 0.18 + Math.cos(jetAngle) * jetLen * aspect + (i % 2 === 0 ? thickness : -thickness);
-        baseTy = cy + 0.24 + Math.sin(jetAngle) * jetLen;
+        const speedNorm = (norm + t * 1.8) % 1; // Ciclo muy acelerado para dar sensación de velocidad extrema
+        const fH = speedNorm * 0.75; // Sube muy alto
+        const taper = (1 - speedNorm) * 0.02 * aspect; // Base firme, punta finísima como un cohete
+        baseTx = cx + (i % 2 === 0 ? taper : -taper);
+        baseTy = cy + 0.30 - fH;
       } 
-      // SLIDE 8: Nuevas Rutas - MANTENIDA CON DESPLAZAMIENTO A LA DERECHA (+0.12)
+      // SLIDE 8: Nuevas Rutas - Desplazada a la derecha
       else if (momentId === "nuevas-rutas" || struct === "orbital_routes") {
         const shiftX = cx + 0.12; 
         if (p.role === "experience") {
@@ -180,7 +189,7 @@ class VisualSystem {
           baseTy = cy + 0.18 - norm * 0.52;
         }
       } 
-      // SLIDE 9: Dos Generaciones - Antorcha Dorada Izq y Azul Der (MANTENIDA)
+      // SLIDE 9: Dos Generaciones - Antorchas Gemelas en paralelo
       else if (momentId === "vision-generaciones" || struct === "dual_rings") {
         const isExp = p.role === "experience";
         const flameCx = isExp ? cx - 0.22 : cx + 0.22;
@@ -190,7 +199,7 @@ class VisualSystem {
         baseTx = flameCx + (i % 2 === 0 ? fW : -fW);
         baseTy = cy + 0.14 - fH;
       } 
-      // SLIDE 10: Trabajan Juntas - Vórtice helicoidal entrelazado (MANTENIDA)
+      // SLIDE 10: Trabajan Juntas - Vórtice de Doble Hélice
       else if (momentId === "trabajan-juntas" || struct === "interlocking_rings") {
         const strandPhase = p.role === "experience" ? 0 : Math.PI;
         const fH = (norm - 0.5) * 0.58;
@@ -198,22 +207,25 @@ class VisualSystem {
         baseTx = cx + Math.sin(twist) * 0.1 * aspect;
         baseTy = cy - fH;
       } 
-      // SLIDE 11: Presente Joven - Llama azul cian gigante emergente en primer plano
+      // SLIDE 11: Presente Joven - Llama en primer plano
       else if (momentId === "presente-joven" || struct === "youth_forward") {
         const fH = norm * 0.58;
         const fW = Math.sin(norm * Math.PI) * 0.08 * aspect;
         baseTx = cx + (i % 2 === 0 ? fW : -fW);
         baseTy = cy + 0.22 - fH;
       } 
-      // SLIDE 12: El Futuro se Construye - Portal / Arco triunfal de fuego simétrico
+      // SLIDE 12: El Futuro se Construye - PIRÁMIDE ESCALONADA (Bloques apilados paso a paso)
       else if (momentId === "futuro-construido" || struct === "mandala") {
-        const arcA = norm * Math.PI;
-        const archR = 0.32;
-        const thickness = (i % 2 === 0 ? 0.018 : -0.018) * aspect;
-        baseTx = cx + Math.cos(arcA) * archR * aspect + thickness;
-        baseTy = cy + 0.2 - Math.sin(arcA) * archR;
+        const steps = 4; // 4 niveles de construcción
+        const stepIndex = Math.floor(norm * steps); // 0, 1, 2, 3
+        const stepWidth = (steps - stepIndex) * 0.07 * aspect; // La base es la más ancha
+        const stepHeight = stepIndex * 0.12; // Altura de cada bloque
+        const horizontalPos = (i % 20) / 20; // Repartir partículas a lo ancho del escalón
+        
+        baseTx = cx - stepWidth + (horizontalPos * stepWidth * 2);
+        baseTy = cy + 0.25 - stepHeight;
       } 
-      // SLIDE 13: Cierre QR - Fuego despejado en las esquinas inferiores
+      // SLIDE 13: Cierre QR - Despeje de zona central
       else if (momentId === "qr-cierre") {
         const side = i % 2 === 0 ? 0.12 : 0.88;
         const fH = norm * 0.25;
@@ -317,7 +329,7 @@ class VisualSystem {
 
       const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, currentRadius);
 
-      // SLIDE 4: SINERGIA TRIPLE (Academia: Dorado, Industria: Rojo, Ciudad: Cian)
+      // SLIDE 4: SINERGIA TRIPLE
       if (isTriad) {
         if (p.lane === 0) {
           grad.addColorStop(0.0, `rgba(255, 255, 240, ${fadeInOut * 0.98})`);
